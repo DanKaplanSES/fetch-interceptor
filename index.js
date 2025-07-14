@@ -20,7 +20,7 @@ unsafeWindow.addFetchInterceptor = function (interceptor) {
         throw new Error(`addFetchInterceptor: Expected parameter interceptor to exist`);
     }
 
-    fetchInterceptors.set(interceptor);
+    fetchInterceptors.add(interceptor);
 }
 
 unsafeWindow.removeFetchInterceptor = function (interceptor) {
