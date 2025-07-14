@@ -41,21 +41,26 @@ unsafeWindow.fetch = async (...args) => {
 
     const response = await origFetch(...args);
 
-    const interceptorPromise = [...fetchInterceptors.values()].find(async (interceptor) => {
-        return await interceptor.isMatch(url, request, response.clone());
-    });
-
-    const interceptor = await interceptorPromise;
-
+    const interceptor = await findMatchingInterceptor(url, request, response);
     if (interceptor === undefined) {
         return response;
     }
 
     const interceptorResponse = await interceptor.onMatch(url, request, response.clone());
-
     if (interceptorResponse === undefined) {
         return response;
     } else {
         return interceptorResponse;
     }
 };
+
+async function findMatchingInterceptor(url, request, response) {
+    const fetchInterceptorArray = [...fetchInterceptors.values()];
+    for (let i = 0; i < fetchInterceptorArray.length; i++) {
+        const possibleMatch = fetchInterceptorArray[i];
+        if (await possibleMatch.isMatch(url, request, response.clone()) === true) {
+            return possibleMatch;
+        }
+    }
+    return undefined;
+}
