@@ -2,8 +2,8 @@
  * FetchInterceptor:
  * 
  * {
- *  isMatch: function (url, request, response) { ... }
- *  onMatch: function (url, request, response) { ... } // returns undefined or a new response, if the response should be modified onMatch
+ *  isMatch: async function (url, request, response) { ... }, // returns true or false. Only first match is used. Order is undefined.
+ *  onMatch: async function (url, request, response) { ... }, // returns Promise<undefined> or a new Promise<Response>, if the response should be modified onMatch
  * }
  */
 
@@ -13,25 +13,22 @@ if (unsafeWindow === undefined) {
 
 const { fetch: origFetch } = unsafeWindow;
 
-let fetchInterceptors = new Map();
+let fetchInterceptors = new Set();
 
-unsafeWindow.addFetchInterceptor = function (interceptorName, interceptor) {
-    if (interceptorName === undefined) {
-        throw new Error(`addFetchInterceptor: Expected string interceptorName to exist`);
-    }
-    if (interceptorName === undefined) {
-        throw new Error(`addFetchInterceptor: Expected object interceptor to exist`);
+unsafeWindow.addFetchInterceptor = function (interceptor) {
+    if (interceptor === undefined) {
+        throw new Error(`addFetchInterceptor: Expected parameter interceptor to exist`);
     }
 
-    fetchInterceptors.set(interceptorName, interceptor);
+    fetchInterceptors.set(interceptor);
 }
 
-unsafeWindow.removeFetchInterceptor = function (interceptorName) {
-    if (interceptorName === undefined) {
-        throw new Error(`removeFetchInterceptor: Expected string interceptorName to exist`);
+unsafeWindow.removeFetchInterceptor = function (interceptor) {
+    if (interceptor === undefined) {
+        throw new Error(`removeFetchInterceptor: Expected parameter interceptor to exist`);
     }
 
-    fetchInterceptors.delete(interceptorName);
+    fetchInterceptors.delete(interceptor)
 }
 
 unsafeWindow.clearFetchInterceptors = function () {
